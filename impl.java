@@ -32,7 +32,7 @@ public class hmac_sha256 extends Applet
 	public hmac_sha256()
 	{
 		rng = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
-		md = MessageDigest.getInstance(MessageDigest.ALG_SHA_256, false);
+		md = MessageDigest.getInstance((byte) 4, false); // 4 = MessageDigest.ALG_SHA_256, but there is some strange compile bug for some cards, so leaving this as 4 for now
 		rng.generateData(rndBuffer, (short)0, LEN_AES_256_KEY);
 		// set the device MAC key to the randomly generated value
 		hmacKey.setKey(rndBuffer, (short) 0);
