@@ -27,7 +27,8 @@ public class hmac_sha256 extends Applet
 	byte[] tempBuffer = JCSystem.makeTransientByteArray(LEN_TEMP_BUFFER, JCSystem.CLEAR_ON_DESELECT);
 	RandomData rng;
 	byte[] rndBuffer = JCSystem.makeTransientByteArray((short) LEN_AES_256_KEY, JCSystem.CLEAR_ON_DESELECT);
-
+	byte[] ipadK = JCSystem.makeTransientByteArray(LEN_HMAC_BLOCK, JCSystem.CLEAR_ON_DESELECT);
+	byte[] opadK = JCSystem.makeTransientByteArray(LEN_HMAC_BLOCK, JCSystem.CLEAR_ON_DESELECT);
 
 	public hmac_sha256()
 	{
@@ -74,8 +75,6 @@ public class hmac_sha256 extends Applet
 		final byte opad = 0x5C;
 		// hmac key is at hmacKey (param) - copy it to rndBuffer
 		hmacKey.getKey(rndBuffer, (short) 0);
-		byte[] ipadK = JCSystem.makeTransientByteArray(LEN_HMAC_BLOCK, JCSystem.CLEAR_ON_DESELECT);
-		byte[] opadK = JCSystem.makeTransientByteArray(LEN_HMAC_BLOCK, JCSystem.CLEAR_ON_DESELECT);
 
 		for (short i=0; i < LEN_HMAC_BLOCK; i++)
 		{
