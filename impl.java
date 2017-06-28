@@ -20,11 +20,9 @@ import javacard.security.RandomData;
 public class hmac_sha256 extends Applet
 {
 	final static short LEN_AES_256_KEY = (short) 32;
-	final static short LEN_TEMP_BUFFER = (short) 256;
 	final static short LEN_HMAC_BLOCK = (short) 64;
 	AESKey hmacKey = (AESKey) KeyBuilder.buildKey (KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_256, false);
 	MessageDigest md;
-	byte[] tempBuffer = JCSystem.makeTransientByteArray(LEN_TEMP_BUFFER, JCSystem.CLEAR_ON_DESELECT);
 	RandomData rng;
 	byte[] rndBuffer = JCSystem.makeTransientByteArray((short) LEN_AES_256_KEY, JCSystem.CLEAR_ON_DESELECT);
 	byte[] ipadK = JCSystem.makeTransientByteArray(LEN_HMAC_BLOCK, JCSystem.CLEAR_ON_DESELECT);
@@ -90,28 +88,23 @@ public class hmac_sha256 extends Applet
 				opadK[i] = (byte) (rndBuffer[i] ^ opad);
 			}
 		}
+
 		// clear the rndBuffer - it can be used now for digest outputs
-		Util.arrayFillNonAtomic(rndBuffer, (short)0, LEN_AES_256_KEY, (byte)0x00);
-		// first find H(ipadK, msg), and output to byte 32 of tempBuffer
-		// copy message after ipadK
-		Util.arrayCopyNonAtomic(ipadK, (short)0, tempBuffer, (short)0, LEN_HMAC_BLOCK);
-		// now place message after it
-		Util.arrayCopyNonAtomic(msg, msgOffset, tempBuffer, LEN_HMAC_BLOCK, msgLength);
-		md.reset();
-		md.doFinal(tempBuffer, (short)0, (short)(LEN_HMAC_BLOCK + msgLength), rndBuffer, (short)0);
-		// now place it in position in tempBuffer
-		Util.arrayCopyNonAtomic(rndBuffer, (short)0, tempBuffer, LEN_HMAC_BLOCK, LEN_AES_256_KEY);
+		Util.arrayFillNonAtomic(rndBuffer, (short) 0, LEN_AES_256_KEY, (byte)0x00);
+
+		// find H(ipadK, msg)
+                md.reset();
+                md.update(ipadK, (short) 0, LEN_HMAC_BLOCK);
+                md.doFinal(msg, msgOffset, msgLength, rndBuffer, (short) 0);
+
 		//now find H(opadK, rndBuffer)
-		// copy in the oPadk
-		Util.arrayCopyNonAtomic(opadK, (short)0, tempBuffer, (short)0, LEN_HMAC_BLOCK);
 		md.reset();
+                md.update(opadK, (short)0, LEN_HMAC_BLOCK);
 		short outputLength;
-		outputLength = md.doFinal(tempBuffer, (short)0, (short) (LEN_AES_256_KEY + LEN_HMAC_BLOCK), response, responseOffset);
+		outputLength = md.doFinal(rndBuffer, (short) 0, LEN_AES_256_KEY, response, responseOffset);
 		md.reset();
-		// clear the temporary buffer
-		Util.arrayFillNonAtomic(tempBuffer, (short)0, LEN_TEMP_BUFFER, (byte)0x00);
 		// clear the rndBuffer
-		Util.arrayFillNonAtomic(rndBuffer, (short)0, LEN_AES_256_KEY, (byte)0x00);
+		Util.arrayFillNonAtomic(rndBuffer, (short) 0, LEN_AES_256_KEY, (byte)0x00);
 		return outputLength;
 	}
 
