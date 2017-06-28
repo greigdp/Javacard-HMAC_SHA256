@@ -125,7 +125,7 @@ public class hmac_sha256 extends Applet
 			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 		}
 		byte[] response = JCSystem.makeTransientByteArray(LEN_AES_256_KEY, JCSystem.CLEAR_ON_DESELECT);
-		hmac_sha256(hmacKey, buffer, ISO7816.OFFSET_CDATA, (short) (buffer[ISO7816.OFFSET_LC]), response, (short) 0);
+		hmac_sha256(hmacKey, buffer, ISO7816.OFFSET_CDATA, (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF), response, (short) 0);
 		// now copy the result
 		Util.arrayCopyNonAtomic(response, (short)0, buffer, (short)0, LEN_AES_256_KEY);
 		// now clear rndBuffer
